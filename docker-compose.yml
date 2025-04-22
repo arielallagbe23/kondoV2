@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  frontend:
+    container_name: kondo-v2-frontend
+    build:
+      context: ./kondo-v2-frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3005:3000"
+    environment:
+      - REACT_APP_BACKEND_URL=http://backend:5001
+    depends_on:
+      - backend
+
+
+  backend:
+    container_name: kondo-v2-backend
+    build:
+      context: ./kondo-v2-backend
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"  # Mappe le port de l'API sur la machine hôte
+    environment:
+      - PORT=5001
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=kondoV2password
+      - DB_NAME=kondo-v2-transactions
+      - DB_PORT=3306
+      - ENCRYPTION_KEY=8a424c343d31ee834d1e66b4987c3e6b75805934a48170d8e62f927db9b9ecca
+      - JWT_SECRET=8a11c65d561f5989c3c1325fe355034337e86fb433ef344d416209c352a82739
+    depends_on:
+      - db
+
+  db:
+    container_name: kondo-v2-db
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: kondoV2password
+      MYSQL_DATABASE: kondo-v2-transactions
+    ports:
+      - "3317:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-db/kondo_demo_dump_for_prof.sql:/docker-entrypoint-initdb.d/dump.sql:ro
+
+
+volumes:
+  mysql_data:
+
+
+
+
+
